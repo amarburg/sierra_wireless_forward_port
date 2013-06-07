@@ -35,9 +35,6 @@ override install_targets := $(srcs:%.c=install_%)
 
 all: default
 
-pi:
-	$(MAKE) CROSS_COMPILE=$(CCPREFIX) ARCH=arm -C $(KERNEL_SRC) SUBDIRS=$(PWD) "obj-m=$(obj-m)" modules
-
 default:
 	@echo "-----------------------------------------------------"
 	@echo "Compiling " $(srcs)
