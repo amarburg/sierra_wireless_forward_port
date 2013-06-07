@@ -8,14 +8,14 @@ partly on its technical specs (compatibility with the major New Zealand
 providers), as well as the fact they actually bother to provide support
 for Linux.  
 
-The unit is actually supported by two kernel modules.  _sierra_ is a
+The unit is supported by two kernel modules.  _sierra_ is a
 USB-serial module, which enumerates a number of `/dev/ttyUSB*` serial
 devices.  These allow direct communication with the modem.  For example,
 I'm using `/dev/ttyUSB2` to send AT-style commands to the modem.
 
 The *sierra_net* module appears as a USB-network driver.  As such,
-the modem appears directly as a network device without any additional
-PPP configuration.
+the modem appears directly as a network device (`wwan0` for me) without any additional
+mucking about with PPP, etc.
 
 Sierra provides
 [instruction](http://mycusthelpadmin.net/SIERRAWIRELESS/_cs/AnswerDetail.aspx?sSessionID=&aid=44)
@@ -26,19 +26,21 @@ installation, I'm running a 3.8 kernel.
 The Linux 3.8 kernel provides the *sierra* (no version number) and
 *sierra_net* (v2.0) drivers, but I was unable to get these drivers to
 enumerate the Aircard 320U.  The tarball from Sierra lists *sierra*
-v.1.7.40 and *sierra_net* v.3.2.   More importantly, out of the box
-the 3.0 Sierra code would not build under 3.8.x (changing USB APIs,
+v.1.7.40 and *sierra_net* v.3.2, but out of the box
+the Sierra code would not build under kernel 3.8.x (changing USB APIs,
 I imagine).
 
 It seemed like a case of the kernel containing old code which was
-being ported forward with each new kernel rev, while the vendor gave
-updated code for an older kernel.  Seemed like a straightforward call
+being ported forward with each new kernel rev, while the vendor was providing
+updated code, but not keeping up with kernel dev.  Seemed like a straightforward call
 to forward-port the driver, which you see here.
 
 I should disclaim I didn't do this using my deep knowledge of the Linux
 kernel APIs, but by a "monkey-see-monkey-do" port between the Sierra
 code and the current kernel code.  It works for me, on Ubuntu 13.04,
 with an Aircard 320U.  Maybe it will work for you too?
+
+I was briefly testing under Ubuntu 12.10, so I also ported to 3.6. I've also been able to use this code to run the Sierra on a RaspberryPi running Raspbian (kernel 3.6.y).  Actually building the kernel modules was mildly inconvenient, instructions can be found on the internet.
 
 Instructions
 ------------
@@ -85,4 +87,6 @@ Then plug in the modem.  I get:
 [ 9944.272435] sd 19:0:0:0: [sdb] Attached SCSI removable disk
 ```
 
-which shows four serial devices (no, I don't actually know what they all do), the network device as `wwan0` and the block device driver for the MMC card slot.  Neat!
+which shows four serial devices (no, I don't actually know what they all do), the network device as `wwan0` and the block device driver for the MMC card slot.  Neat!  Yes, there are even non-fatal warnings!
+
+On the application side, I've found `modem-manager` supports this card well, and actually scraped its AT commands when writing my own test scripts.  I haven't tried `wvdial` or etc, but I suppose they could be made to work.
